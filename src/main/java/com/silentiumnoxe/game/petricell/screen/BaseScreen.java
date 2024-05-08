@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-public abstract class BasicScreen implements Screen {
+public abstract class BaseScreen implements Screen {
 
     protected final Stage stage;
 
-    public BasicScreen() {
+    public BaseScreen() {
         this.stage = new Stage();
     }
 
