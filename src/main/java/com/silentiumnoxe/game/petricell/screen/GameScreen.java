@@ -2,6 +2,8 @@ package com.silentiumnoxe.game.petricell.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -38,9 +40,22 @@ public class GameScreen extends BaseScreen {
             batch.draw(agent.getTexture(), agent.getPosition().x, agent.getPosition().y);
         }
 
-        font.draw(batch, "FPS: %d".formatted(Gdx.graphics.getFramesPerSecond()), 0f, 60f);
-        font.draw(batch, "UPS: %d".formatted(GameLoop.getUpdatesPerSecond()), 0f, 40f);
-        font.draw(batch, "Agents: %s".formatted(df.format(agents.size)), 0f, 20f);
+        var sectors = gameLoop.getSectors();
+//        for (var sector : sectors) {
+//            sector.draw(batch);
+//
+//            font.draw(
+//                    batch,
+//                    "%d".formatted(sector.getSize()),
+//                    sector.getX() + 10,
+//                    sector.getY() + 20
+//            );
+//        }
+
+        font.draw(batch, "FPS: %d".formatted(Gdx.graphics.getFramesPerSecond()), 10f, Gdx.graphics.getHeight() - 10f);
+        font.draw(batch, "UPS: %d".formatted(GameLoop.getUpdatesPerSecond()), 10f, Gdx.graphics.getHeight() - 30f);
+        font.draw(batch, "Agents: %s".formatted(df.format(agents.size)), 10f, Gdx.graphics.getHeight() - 50f);
+        font.draw(batch, "Sectors: %s".formatted(df.format(sectors.size())), 10f, Gdx.graphics.getHeight() - 70f);
         batch.end();
     }
 }
