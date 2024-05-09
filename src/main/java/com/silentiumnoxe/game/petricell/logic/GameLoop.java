@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.silentiumnoxe.game.petricell.model.Agent;
@@ -34,7 +35,7 @@ public class GameLoop {
         var texture = new Texture(pixmap);
 
         for (int i = 0; i < 1_000; i++) {
-            var x = new Agent(new Vector3(500f, 500f, 0), randomVelocity(), texture);
+            var x = new Agent(randomPosition(), randomVelocity(), texture, new Rectangle(0, 0, 10, 10));
             agents.add(x);
         }
     }
@@ -61,8 +62,26 @@ public class GameLoop {
 
             var pos = x.getPosition().add(x.getVelocity());
             x.setVelocity(borderCollision(pos, x.getVelocity()));
+            x.setVelocity(agentCollision(pos, x.getVelocity(), i));
             x.setPosition(pos);
         }
+    }
+
+    private Vector3 agentCollision(final Vector3 pos, final Vector3 velocity, final int i) {
+        var target = agents.get(i);
+        target.getMask().setPosition(pos.x, pos.y);
+        for (var j = 0; j < agents.size; j++) {
+            if (i == j) continue;
+
+            var a = agents.get(j);
+            a.getMask().setPosition(a.getPosition().x, a.getPosition().y);
+            if (target.getMask().overlaps(a.getMask())) {
+                a.setVelocity(new Vector3(-a.getVelocity().x, -a.getVelocity().y, 0));
+                return new Vector3(-velocity.x, -velocity.y, 0);
+            }
+        }
+
+        return velocity;
     }
 
     private Vector3 borderCollision(final Vector3 pos, final Vector3 velocity) {
@@ -80,7 +99,12 @@ public class GameLoop {
 
     private Vector3 randomVelocity() {
         var r = new Random();
-        return new Vector3(r.nextFloat(-1.0f, 1.0f), r.nextFloat(-1.0f, 1.0f), 0);
+        return new Vector3(r.nextFloat(-4.0f, 4.0f), r.nextFloat(-4.0f, 4.0f), 0);
+    }
+
+    private Vector3 randomPosition() {
+        var r = new Random();
+        return new Vector3(r.nextFloat(Gdx.graphics.getWidth()), r.nextFloat(Gdx.graphics.getHeight()), 0);
     }
 
     void countUPS() {
