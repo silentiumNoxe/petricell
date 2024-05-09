@@ -18,6 +18,9 @@ import java.util.UUID;
 
 public class GameLoop {
 
+    private static final float WORLD_WIDTH = Gdx.graphics.getWidth() * 2;
+    private static final float WORLD_HEIGHT = Gdx.graphics.getHeight() * 2;
+
     private static int updatesPerSecond = 0;
 
     private final Array<Agent> agents = new Array<>();
@@ -37,7 +40,7 @@ public class GameLoop {
     }
 
     public GameLoop() {
-        splitScreen(16 * 16, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        splitScreen(64 * 64, WORLD_WIDTH, WORLD_HEIGHT);
         sectorId = sectors.get(sectors.size() / 3).getId();
 
         var pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
@@ -45,7 +48,7 @@ public class GameLoop {
         pixmap.fillCircle(10, 10, 1);
         var texture = new Texture(pixmap);
 
-        for (int i = 0; i < 1_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             var x = new Agent(randomPosition(), randomVelocity(), texture, new Rectangle(0, 0, 2, 2), null);
             for (Sector s : sectors) {
                 if (s.overlaps(x.getMask())) {
@@ -135,10 +138,10 @@ public class GameLoop {
     private Vector3 borderCollision(final Vector3 pos, final Vector3 velocity) {
         var v = velocity;
 
-        if (pos.x < 0 || pos.x > Gdx.graphics.getWidth()) {
+        if (pos.x < 0 || pos.x > WORLD_WIDTH) {
             v = new Vector3(-v.x, v.y, 0);
         }
-        if (pos.y < 0 || pos.y > Gdx.graphics.getHeight()) {
+        if (pos.y < 0 || pos.y > WORLD_HEIGHT) {
             v = new Vector3(v.x, -v.y, 0);
         }
 
@@ -152,7 +155,7 @@ public class GameLoop {
 
     private Vector3 randomPosition() {
         var r = new Random();
-        return new Vector3(r.nextFloat(0, (float) Gdx.graphics.getWidth()), r.nextFloat(0, (float) Gdx.graphics.getHeight()), 0);
+        return new Vector3(r.nextFloat(0, WORLD_WIDTH), r.nextFloat(0, WORLD_HEIGHT), 0);
     }
 
     void countUPS() {
