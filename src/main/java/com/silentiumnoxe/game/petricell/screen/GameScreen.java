@@ -56,6 +56,7 @@ public class GameScreen extends BaseScreen {
         font.draw(batch, "UPS: %d".formatted(GameLoop.getUpdatesPerSecond()), 10f, Gdx.graphics.getHeight() - 30f);
         font.draw(batch, "Agents: %s".formatted(df.format(agents.size)), 10f, Gdx.graphics.getHeight() - 50f);
         font.draw(batch, "Sectors: %s".formatted(df.format(sectors.size())), 10f, Gdx.graphics.getHeight() - 70f);
+        font.draw(batch, "Heap: %sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)), 10f, Gdx.graphics.getHeight() - 90f);
         batch.end();
     }
 }

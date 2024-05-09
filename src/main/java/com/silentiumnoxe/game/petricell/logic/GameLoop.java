@@ -14,19 +14,17 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 public class GameLoop {
 
-    private static final float WORLD_WIDTH = Gdx.graphics.getWidth() * 2;
-    private static final float WORLD_HEIGHT = Gdx.graphics.getHeight() * 2;
+    private static final float WORLD_WIDTH = Gdx.graphics.getWidth();
+    private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
+    private static final int agentCount = 100_000;
 
     private static int updatesPerSecond = 0;
 
     private final Array<Agent> agents = new Array<>();
     private final List<Sector> sectors = new ArrayList<>();
-    @Getter
-    private final UUID sectorId;
 
     private long lastFrameTime = -1;
     private float deltaTime;
@@ -40,15 +38,14 @@ public class GameLoop {
     }
 
     public GameLoop() {
-        splitScreen(64 * 64, WORLD_WIDTH, WORLD_HEIGHT);
-        sectorId = sectors.get(sectors.size() / 3).getId();
+        splitScreen(70 * 70, WORLD_WIDTH, WORLD_HEIGHT);
 
-        var pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
+        var pixmap = new Pixmap(3, 3, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.RED);
-        pixmap.fillCircle(10, 10, 1);
+        pixmap.fillCircle(2, 2, 1);
         var texture = new Texture(pixmap);
 
-        for (int i = 0; i < 100_000; i++) {
+        for (int i = 0; i < agentCount; i++) {
             var x = new Agent(randomPosition(), randomVelocity(), texture, new Rectangle(0, 0, 2, 2), null);
             for (Sector s : sectors) {
                 if (s.overlaps(x.getMask())) {
@@ -65,11 +62,28 @@ public class GameLoop {
         var sectorWidth = width / side;
         var sectorHeight = height / side;
 
+        int si = -1;
         for (var i = 0; i < side; i++) {
             for (var k = 0; k < side; k++) {
                 var x = i * sectorWidth;
                 var y = k * sectorHeight;
-                sectors.add(new Sector(x, y, sectorWidth, sectorHeight));
+                var isBorder = x == 0 || y == 0 || x == width - sectorWidth || y == height - sectorHeight;
+                var sector = new Sector(x, y, sectorWidth, sectorHeight, isBorder);
+                sectors.add(sector);
+                si++;
+
+                var left = si - side;
+                var bottom = si - 1;
+
+                if (left >= 0) {
+                    sector.setLeft(sectors.get((int) left));
+                    sectors.get((int) left).setRight(sector);
+                }
+
+                if (bottom >= 0) {
+                    sector.setBottom(sectors.get(bottom));
+                    sectors.get(bottom).setTop(sector);
+                }
             }
         }
     }
@@ -77,7 +91,11 @@ public class GameLoop {
     public void start() {
         new Thread(() -> {
             while (true) {
-                update();
+                try {
+                    update();
+                } catch (Exception e) {
+                    Gdx.app.error("GameLoop", "Error in game loop - "+e.getMessage(), e);
+                }
 
                 try {
                     Thread.sleep(1000 / 60);
@@ -91,61 +109,61 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        for (var i = 0; i < agents.size; i++) {
-            var agent = agents.get(i);
-            var agentSector = agent.getSector();
+        for (var i = 0; i < sectors.size(); i++) {
+            var sector = sectors.get(i);
+            for (var j = 0; j < agents.size; j++) {
+                if (j >= sector.getAgents().size) {
+                    break;
+                }
+                var agent = sector.getAgents().get(j);
+                var pos = agent.getPosition();
+                var vel = agent.getVelocity();
 
-            var pos = agent.getPosition();
-            agent.setVelocity(borderCollision(pos, agent.getVelocity()));
-            agent.setVelocity(agentCollision(agent, agentSector.getAgents()));
-            pos = pos.add(agent.getVelocity());
-            agent.setPosition(pos);
+                if (sector.isBorder()) {
+                    borderCollision(pos, vel);
+                }
 
-            if (!agentSector.overlaps(agent.getMask())) {
-                for (var s : sectors) {
-                    if (s.getId() == agentSector.getId()) {
-                        continue;
-                    }
+                agentCollision(agent, sector.getAgents());
+                pos.add(vel);
 
-                    if (s.overlaps(agent.getMask())) {
-                        agentSector.remove(agent);
-                        s.add(agent);
-                        agent.setSector(s);
-                    }
+                var sector2 = sector.findRelative(pos);
+                if (sector2 != null && sector != sector2) {
+                    sector.remove(agent);
+                    sector2.add(agent);
+                    agent.setSector(sector2);
                 }
             }
         }
     }
 
-    private Vector3 agentCollision(final Agent agent, final List<Agent> targets) {
-        var pos = agent.getPosition();
-        agent.getMask().setPosition(pos.x, pos.y);
-        for (var target : targets) {
+    private void agentCollision(final Agent agent, final Array<Agent> targets) {
+        for (var i = 0; i < targets.size; i++) {
+            var target = targets.get(i);
+
             if (agent.getId() == target.getId()) {
                 continue;
             }
 
-            target.getMask().setPosition(target.getPosition().x, target.getPosition().y);
+            if (agent.getSector().getId() != target.getSector().getId()) {
+                continue;
+            }
+
             if (target.getMask().overlaps(agent.getMask())) {
-                target.setVelocity(new Vector3(-target.getVelocity().x, -target.getVelocity().y, 0));
-                return new Vector3(-agent.getVelocity().x, -agent.getVelocity().y, 0);
+                target.getVelocity().x = -target.getVelocity().x;
+                target.getVelocity().y = -target.getVelocity().y;
+                agent.getVelocity().x = -agent.getVelocity().x;
+                agent.getVelocity().y = -agent.getVelocity().y;
             }
         }
-
-        return agent.getVelocity();
     }
 
-    private Vector3 borderCollision(final Vector3 pos, final Vector3 velocity) {
-        var v = velocity;
-
+    private void borderCollision(final Vector3 pos, final Vector3 velocity) {
         if (pos.x < 0 || pos.x > WORLD_WIDTH) {
-            v = new Vector3(-v.x, v.y, 0);
+            velocity.x = -velocity.x;
         }
         if (pos.y < 0 || pos.y > WORLD_HEIGHT) {
-            v = new Vector3(v.x, -v.y, 0);
+            velocity.y = -velocity.y;
         }
-
-        return v;
     }
 
     private Vector3 randomVelocity() {
