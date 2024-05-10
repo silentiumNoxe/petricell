@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -60,7 +61,7 @@ public class Sector extends Rectangle {
         return agents.size;
     }
 
-    public Sector findRelative(final Vector3 pos) {
+    public Sector findRelative(final Vector2 pos) {
         if (pos.x < x) {
             return left;
         } else if (pos.x > x + width) {
