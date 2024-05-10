@@ -42,13 +42,15 @@ public class GameLoop {
     public GameLoop() {
         splitScreen(70 * 70, WORLD_WIDTH, WORLD_HEIGHT);
 
-        var pixmap = new Pixmap(3, 3, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.RED);
-        pixmap.fillCircle(2, 2, 1);
-        var texture = new Texture(pixmap);
-
         for (int i = 0; i < AGENT_COUNT; i++) {
-            var x = new Agent(randomPosition(WORLD_CIRCLE), randomVelocity(), randomAngle(), texture, new Rectangle(0, 0, 2, 2), null);
+            var size = randomSize();
+
+            var pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.RED);
+            pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
+            var texture = new Texture(pixmap);
+
+            var x = new Agent(randomPosition(WORLD_CIRCLE), randomVelocity(), randomAngle(), texture, new Rectangle(0, 0, 2, 2), null, randomSize());
             for (Sector s : sectors) {
                 if (s.overlaps(x.getMask())) {
                     s.add(x);
@@ -195,6 +197,11 @@ public class GameLoop {
                 r.nextFloat(border.x - border.radius / 2, border.x + border.radius / 2),
                 r.nextFloat(border.y - border.radius / 2, border.y + border.radius / 2)
         );
+    }
+
+    private int randomSize() {
+        var r = new Random();
+        return r.nextInt(10, 20);
     }
 
     void countUPS() {

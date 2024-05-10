@@ -21,6 +21,8 @@ public class Agent {
     private Rectangle mask;
     private Sector sector;
 
+    private int size;
+
     public Rectangle getMask() {
         return new Rectangle(position.x, position.y, mask.width, mask.height);
     }

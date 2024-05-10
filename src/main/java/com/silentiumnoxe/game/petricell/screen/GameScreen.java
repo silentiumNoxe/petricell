@@ -52,10 +52,10 @@ public class GameScreen extends BaseScreen {
             batch.draw(agent.getTexture(), agent.getPosition().x, agent.getPosition().y);
         }
 
-        var worldCircle = GameLoop.WORLD_CIRCLE;
+//        var worldCircle = GameLoop.WORLD_CIRCLE;
 
-        batch.draw(petriTexture, worldCircle.x-worldCircle.radius-16, worldCircle.y-worldCircle.radius-16);
-        batch.draw(pointTexture, GameLoop.WORLD_CIRCLE.x, GameLoop.WORLD_CIRCLE.y);
+//        batch.draw(petriTexture, worldCircle.x-worldCircle.radius-12, worldCircle.y-worldCircle.radius-12);
+//        batch.draw(pointTexture, GameLoop.WORLD_CIRCLE.x, GameLoop.WORLD_CIRCLE.y);
 
         font.draw(batch, "FPS: %d".formatted(Gdx.graphics.getFramesPerSecond()), 10f, Gdx.graphics.getHeight() - 10f);
         font.draw(batch, "UPS: %d".formatted(GameLoop.getUpdatesPerSecond()), 10f, Gdx.graphics.getHeight() - 30f);
