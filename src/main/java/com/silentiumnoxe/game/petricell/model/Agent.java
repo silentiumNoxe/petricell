@@ -7,8 +7,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -22,7 +24,6 @@ import java.util.UUID;
 public class Agent extends Actor {
 
     private final UUID id = UUID.randomUUID();
-    private Vector2 position;
     private float velocity;
     private float angle;
     private Texture texture;
@@ -41,7 +42,11 @@ public class Agent extends Actor {
             final Texture texture2,
             final int size
     ) {
-        this.position = position;
+        this.setBounds(position.x, position.y, size, size);
+        this.setWidth(size);
+        this.setHeight(size);
+        this.setPosition(position.x, position.y);
+
         this.velocity = velocity;
         this.angle = angle;
         this.texture = texture;
@@ -49,11 +54,16 @@ public class Agent extends Actor {
         this.size = size;
         this.mask = new Circle(position.x, position.y, size);
 
-        this.addListener(onclick());
+        this.addListener(new ClickListener() {
+            @Override
+            public void clicked(final InputEvent event, final float x, final float y) {
+                onclick(x, y);
+            }
+        });
     }
 
     public Circle getMask() {
-        mask.setPosition(position);
+        mask.setPosition(getX(), getY());
         return mask;
     }
 
@@ -75,17 +85,15 @@ public class Agent extends Actor {
 
     @Override
     public void draw(final Batch batch, final float parentAlpha) {
-        batch.draw(getTexture(), position.x, position.y);
+        batch.draw(getTexture(), getX(), getY());
     }
 
-    private ClickListener onclick() {
-        var agent = this;
-        return new ClickListener() {
-            @Override
-            public void clicked(final InputEvent event, final float x, final float y) {
-                System.out.printf("%s clicked%n".formatted(agent.getId()));
-                agent.setSelected(!agent.isSelected());
-            }
-        };
+    private void onclick(final float x, final float y) {
+        selected = true;
+        SelectedAgentHolder.getInstance().setSelected(this);
+    }
+
+    public Vector2 getPosition() {
+        return new Vector2(getX(), getY());
     }
 }

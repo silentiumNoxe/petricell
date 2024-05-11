@@ -24,7 +24,7 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 50;
+    public static final int AGENT_COUNT = 1050;
 
     private static int updatesPerSecond = 0;
 
@@ -141,7 +141,7 @@ public class GameLoop {
             borderCollision(WORLD_CIRCLE, agent);
             agentCollision(agent);
 
-            pos.set(
+            agent.setPosition(
                     (float) (pos.x + vel * Math.cos(rad)),
                     (float) (pos.y + vel * Math.sin(rad))
             );

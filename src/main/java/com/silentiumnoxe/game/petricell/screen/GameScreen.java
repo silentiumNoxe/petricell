@@ -7,14 +7,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.silentiumnoxe.game.petricell.component.GroupAgent;
 import com.silentiumnoxe.game.petricell.component.KVLabel;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
-import com.silentiumnoxe.game.petricell.logic.GlobalInputListener;
-import com.silentiumnoxe.game.petricell.model.Agent;
-import org.checkerframework.checker.units.qual.A;
+import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
 
 import java.text.DecimalFormat;
 
@@ -55,6 +51,7 @@ public class GameScreen extends BaseScreen {
         var statsGroup = new Group();
         statsGroup.setName("gr-stats");
         statsGroup.setHeight(80);
+        statsGroup.setPosition(0, 0);
         stage.addActor(statsGroup);
 
         var margin = 25;
@@ -78,11 +75,33 @@ public class GameScreen extends BaseScreen {
         heap.setName("stat-heap");
         heap.setPosition(statsGroup.getX(), agents.getY() - margin);
         statsGroup.addActor(heap);
+
+        var selectedAgentStatsGroup = new Group();
+        selectedAgentStatsGroup.setName("gr-selected-agent-stats");
+        selectedAgentStatsGroup.setHeight(80);
+        selectedAgentStatsGroup.setPosition(0, 300);
+        stage.addActor(selectedAgentStatsGroup);
+
+        var agentPos = new KVLabel("Position", defaultFont);
+        agentPos.setName("stat-agent-pos");
+        agentPos.setPosition(selectedAgentStatsGroup.getX(), selectedAgentStatsGroup.getY() + selectedAgentStatsGroup.getHeight());
+        selectedAgentStatsGroup.addActor(agentPos);
+
+        var agentVel = new KVLabel("Velocity", defaultFont);
+        agentVel.setName("stat-agent-vel");
+        agentVel.setPosition(selectedAgentStatsGroup.getX(), agentPos.getY() - margin);
+        selectedAgentStatsGroup.addActor(agentVel);
+
+        var agentAngle = new KVLabel("Angle", defaultFont);
+        agentAngle.setName("stat-agent-angle");
+        agentAngle.setPosition(selectedAgentStatsGroup.getX(), agentVel.getY() - margin);
+        selectedAgentStatsGroup.addActor(agentAngle);
     }
 
     @Override
     public void postRender(final float delta) {
         updateStats();
+        updateSelectedAgentStats();
     }
 
     private void updateStats() {
@@ -92,5 +111,17 @@ public class GameScreen extends BaseScreen {
         ((KVLabel) root.findActor("stat-agents")).setValue(df.format(GameLoop.AGENT_COUNT));
         ((KVLabel) root.findActor("stat-heap")).setValue(
                 "%sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)));
+    }
+
+    private void updateSelectedAgentStats() {
+        var agent = SelectedAgentHolder.getInstance().getSelected();
+        if (agent == null) {
+            return;
+        }
+
+        var root = stage.getRoot();
+        ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted((int) agent.getX(), (int) agent.getY()));
+        ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
+        ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
     }
 }
