@@ -38,11 +38,4 @@ public class Agent {
 
         this.angle = x;
     }
-
-    public void setVelocity(final float velocity) {
-        if (velocity < 0) {
-            this.velocity = -velocity;
-            setAngle(angle + 180);
-        }
-    }
 }

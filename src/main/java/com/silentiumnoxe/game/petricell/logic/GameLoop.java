@@ -21,7 +21,7 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 1_000;
+    public static final int AGENT_COUNT = 1000;
 
     private static int updatesPerSecond = 0;
 
@@ -127,19 +127,11 @@ public class GameLoop {
                 var rad = agl * Math.PI / 180;
 
                 borderCollision(WORLD_CIRCLE, agent);
-                agentCollision(agent, sector.getAgents());
-
-                var oldX = pos.x;
-                var oldY = pos.y;
 
                 pos.set(
                         (float) (pos.x + vel * Math.cos(rad)),
                         (float) (pos.y + vel * Math.sin(rad))
                 );
-//                pos.set(
-//                        pos.x - 1f,
-//                        pos.y
-//                );
 
                 var sector2 = sector.findRelative(pos);
                 if (sector2 != null && sector != sector2) {
@@ -158,7 +150,7 @@ public class GameLoop {
             return;
         }
 
-        agent.setAngle(agent.getAngle() + 180);
+        agent.setVelocity(0);
     }
 
     private void agentCollision(final Agent agent, final Array<Agent> targets) {
@@ -190,6 +182,7 @@ public class GameLoop {
     private float randomAngle() {
         var r = new Random();
         return r.nextFloat(360f);
+//        return 90;
     }
 
     private Vector2 randomPosition(final Circle border) {
