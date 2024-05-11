@@ -1,4 +1,4 @@
-# SeaBattleJava
+# Petricell
 
 ### Install Gradle
 
