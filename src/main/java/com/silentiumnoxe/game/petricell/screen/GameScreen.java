@@ -1,28 +1,37 @@
 package com.silentiumnoxe.game.petricell.screen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.silentiumnoxe.game.petricell.component.GroupAgent;
+import com.silentiumnoxe.game.petricell.component.KVLabel;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
+import com.silentiumnoxe.game.petricell.logic.GlobalInputListener;
+import com.silentiumnoxe.game.petricell.model.Agent;
+import org.checkerframework.checker.units.qual.A;
 
 import java.text.DecimalFormat;
 
 public class GameScreen extends BaseScreen {
 
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
-    private final GameLoop gameLoop = new GameLoop();
+    private final BitmapFont defaultFont = new BitmapFont();
     private final DecimalFormat df = new DecimalFormat("#,###.##");
     private final Texture petriTexture;
     private final Texture pointTexture;
 
+    private GameLoop gameLoop;
+
     public GameScreen() {
-        var size = (int) GameLoop.WORLD_CIRCLE.radius+12;
+        super();
+
+        var size = (int) GameLoop.WORLD_CIRCLE.radius + 12;
         Pixmap pixmap = new Pixmap(size * 2 + 10, size * 2 + 10, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.GREEN);
         pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size);
@@ -36,31 +45,52 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public void show() {
+        super.show();
+
+        var groupAgents = new GroupAgent();
+        stage.addActor(groupAgents);
+        gameLoop = new GameLoop(groupAgents);
         gameLoop.start();
+
+        var statsGroup = new Group();
+        statsGroup.setName("gr-stats");
+        statsGroup.setHeight(80);
+        stage.addActor(statsGroup);
+
+        var margin = 25;
+
+        var fps = new KVLabel("FPS", defaultFont);
+        fps.setName("stat-fps");
+        fps.setPosition(statsGroup.getX(), statsGroup.getY() + statsGroup.getHeight());
+        statsGroup.addActor(fps);
+
+        var ups = new KVLabel("UPS", defaultFont);
+        ups.setName("stat-ups");
+        ups.setPosition(statsGroup.getX(), fps.getY() - margin);
+        statsGroup.addActor(ups);
+
+        var agents = new KVLabel("Agents", defaultFont);
+        agents.setName("stat-agents");
+        agents.setPosition(statsGroup.getX(), ups.getY() - margin);
+        statsGroup.addActor(agents);
+
+        var heap = new KVLabel("Heap", defaultFont);
+        heap.setName("stat-heap");
+        heap.setPosition(statsGroup.getX(), agents.getY() - margin);
+        statsGroup.addActor(heap);
     }
 
     @Override
-    public void render(final float delta) {
-        ScreenUtils.clear(Color.BLACK);
+    public void postRender(final float delta) {
+        updateStats();
+    }
 
-        var agents = gameLoop.getAgents();
-
-        batch.begin();
-
-        for (var i = 0; i < agents.size; i++) {
-            var agent = agents.get(i);
-            batch.draw(agent.getTexture(), agent.getPosition().x, agent.getPosition().y);
-        }
-
-//        var worldCircle = GameLoop.WORLD_CIRCLE;
-
-//        batch.draw(petriTexture, worldCircle.x-worldCircle.radius-12, worldCircle.y-worldCircle.radius-12);
-//        batch.draw(pointTexture, GameLoop.WORLD_CIRCLE.x, GameLoop.WORLD_CIRCLE.y);
-
-        font.draw(batch, "FPS: %d".formatted(Gdx.graphics.getFramesPerSecond()), 10f, Gdx.graphics.getHeight() - 10f);
-        font.draw(batch, "UPS: %d".formatted(GameLoop.getUpdatesPerSecond()), 10f, Gdx.graphics.getHeight() - 30f);
-        font.draw(batch, "Agents: %s".formatted(df.format(GameLoop.AGENT_COUNT)), 10f, Gdx.graphics.getHeight() - 50f);
-        font.draw(batch, "Heap: %sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)), 10f, Gdx.graphics.getHeight() - 90f);
-        batch.end();
+    private void updateStats() {
+        var root = stage.getRoot();
+        ((KVLabel) root.findActor("stat-fps")).setValue(Gdx.graphics.getFramesPerSecond());
+        ((KVLabel) root.findActor("stat-ups")).setValue(GameLoop.getUpdatesPerSecond());
+        ((KVLabel) root.findActor("stat-agents")).setValue(df.format(GameLoop.AGENT_COUNT));
+        ((KVLabel) root.findActor("stat-heap")).setValue(
+                "%sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)));
     }
 }

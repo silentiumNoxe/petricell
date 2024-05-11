@@ -1,6 +1,7 @@
 package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,8 +9,10 @@ import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.silentiumnoxe.game.petricell.component.GroupAgent;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +24,11 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 1000;
+    public static final int AGENT_COUNT = 50;
 
     private static int updatesPerSecond = 0;
 
-    private final Array<Agent> agents = new Array<>();
+    private final GroupAgent groupAgent;
     private final List<Sector> sectors = new ArrayList<>();
 
     private long lastFrameTime = -1;
@@ -39,8 +42,9 @@ public class GameLoop {
         return updatesPerSecond;
     }
 
-    public GameLoop() {
-        splitScreen(70 * 70, WORLD_WIDTH, WORLD_HEIGHT);
+    public GameLoop(final GroupAgent groupAgent) {
+        this.groupAgent = groupAgent;
+        splitScreen(5 * 5, WORLD_WIDTH, WORLD_HEIGHT);
 
         for (int i = 0; i < AGENT_COUNT; i++) {
             var size = randomSize();
@@ -50,15 +54,26 @@ public class GameLoop {
             pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
             var texture = new Texture(pixmap);
 
-            var x = new Agent(randomPosition(WORLD_CIRCLE), randomVelocity(), randomAngle(), texture,
-                    new Rectangle(0, 0, 2, 2), null, randomSize());
+            var pixmap2 = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+            pixmap2.setColor(Color.WHITE);
+            pixmap2.drawCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, size / 3);
+            var texture2 = new Texture(pixmap2);
+
+            var x = new Agent(
+                    randomPosition(WORLD_CIRCLE),
+                    randomVelocity(),
+                    randomAngle(),
+                    texture,
+                    texture2,
+                    randomSize()
+            );
             for (Sector s : sectors) {
-                if (s.overlaps(x.getMask())) {
+                if (s.contains(x.getMask())) {
                     s.add(x);
                     x.setSector(s);
                 }
             }
-            agents.add(x);
+            groupAgent.addAgent(x);
         }
     }
 
@@ -114,32 +129,22 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        for (var i = 0; i < sectors.size(); i++) {
-            var sector = sectors.get(i);
-            for (var j = 0; j < agents.size; j++) {
-                if (j >= sector.getAgents().size) {
-                    break;
-                }
-                var agent = sector.getAgents().get(j);
-                var pos = agent.getPosition();
-                var vel = agent.getVelocity();
-                var agl = agent.getAngle();
-                var rad = agl * Math.PI / 180;
+        var agents = groupAgent.getAgents();
+        for (var j = 0; j < agents.size; j++) {
 
-                borderCollision(WORLD_CIRCLE, agent);
+            var agent = agents.get(j);
+            var pos = agent.getPosition();
+            var vel = agent.getVelocity();
+            var agl = agent.getAngle();
+            var rad = agl * Math.PI / 180;
 
-                pos.set(
-                        (float) (pos.x + vel * Math.cos(rad)),
-                        (float) (pos.y + vel * Math.sin(rad))
-                );
+            borderCollision(WORLD_CIRCLE, agent);
+            agentCollision(agent);
 
-                var sector2 = sector.findRelative(pos);
-                if (sector2 != null && sector != sector2) {
-                    sector.remove(agent);
-                    sector2.add(agent);
-                    agent.setSector(sector2);
-                }
-            }
+            pos.set(
+                    (float) (pos.x + vel * Math.cos(rad)),
+                    (float) (pos.y + vel * Math.sin(rad))
+            );
         }
     }
 
@@ -153,7 +158,9 @@ public class GameLoop {
         agent.setVelocity(0);
     }
 
-    private void agentCollision(final Agent agent, final Array<Agent> targets) {
+    private void agentCollision(final Agent agent) {
+//        var sector = agent.getSector();
+//        var targets = sector.getAgents();
 //        for (var i = 0; i < targets.size; i++) {
 //            var target = targets.get(i);
 //
@@ -165,11 +172,9 @@ public class GameLoop {
 //                continue;
 //            }
 //
-//            if (target.getMask().overlaps(agent.getMask())) {
-//                target.getVelocity().x = -target.getVelocity().x;
-//                target.getVelocity().y = -target.getVelocity().y;
-//                agent.getVelocity().x = -agent.getVelocity().x;
-//                agent.getVelocity().y = -agent.getVelocity().y;
+//            if (agent.getMask().overlaps(target.getMask())) {
+//                agent.setVelocity(-agent.getVelocity());
+//                target.setVelocity(-target.getVelocity());
 //            }
 //        }
     }
@@ -216,10 +221,6 @@ public class GameLoop {
         }
         frames++;
         frameId++;
-    }
-
-    public Array<Agent> getAgents() {
-        return agents;
     }
 
     public List<Sector> getSectors() {

@@ -24,7 +24,17 @@ public abstract class BaseScreen implements Screen {
         ScreenUtils.clear(Color.BLACK);
 
         stage.act();
+        preRender(delta);
         stage.draw();
+        postRender(delta);
+    }
+
+    public void preRender(final float delta) {
+
+    }
+
+    public void postRender(final float delta) {
+
     }
 
     @Override
