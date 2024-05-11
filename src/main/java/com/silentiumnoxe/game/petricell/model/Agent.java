@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
+import com.silentiumnoxe.game.petricell.logic.ZoomValueHolder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -31,7 +32,8 @@ public class Agent extends Actor {
     private Circle mask;
     private Sector sector;
 
-    private int size;
+    // value in nanometers
+    private long size;
     private boolean selected;
 
     public Agent(
@@ -40,7 +42,7 @@ public class Agent extends Actor {
             final float angle,
             final Texture texture,
             final Texture texture2,
-            final int size
+            final long size
     ) {
         this.setBounds(position.x, position.y, size, size);
         this.setWidth(size);
@@ -85,7 +87,12 @@ public class Agent extends Actor {
 
     @Override
     public void draw(final Batch batch, final float parentAlpha) {
-        batch.draw(getTexture(), getX(), getY());
+        var zoom = ZoomValueHolder.getInstance().getZoomNano();
+        var size = this.size / zoom;
+        if (size > 5000) {
+            return;
+        }
+        batch.draw(getTexture(), getX(), getY(), size, size);
     }
 
     private void onclick(final float x, final float y) {

@@ -24,7 +24,7 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 1050;
+    public static final int AGENT_COUNT = 10;
 
     private static int updatesPerSecond = 0;
 
@@ -49,16 +49,16 @@ public class GameLoop {
         for (int i = 0; i < AGENT_COUNT; i++) {
             var size = randomSize();
 
-            var pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+            var pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
             pixmap.setColor(new Color(255, 0, 0, 1));
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 20 / 3);
             pixmap.setColor(new Color(0, 0, 0, 1));
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 5);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 20 / 5);
             var texture = new Texture(pixmap);
 
-            var pixmap2 = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+            var pixmap2 = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
             pixmap2.setColor(Color.WHITE);
-            pixmap2.drawCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, size / 3);
+            pixmap2.drawCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, 20 / 3);
             var texture2 = new Texture(pixmap2);
 
             var x = new Agent(
@@ -182,8 +182,9 @@ public class GameLoop {
     }
 
     private float randomVelocity() {
-        var r = new Random();
-        return r.nextFloat(1.0f);
+//        var r = new Random();
+//        return r.nextFloat(0.3f);
+        return 0;
     }
 
     private float randomAngle() {
@@ -200,9 +201,9 @@ public class GameLoop {
         );
     }
 
-    private int randomSize() {
+    private long randomSize() {
         var r = new Random();
-        return r.nextInt(15, 25);
+        return r.nextLong(ZoomValueHolder.MAX_ZOOM, ZoomValueHolder.MIN_ZOOM);
     }
 
     void countUPS() {

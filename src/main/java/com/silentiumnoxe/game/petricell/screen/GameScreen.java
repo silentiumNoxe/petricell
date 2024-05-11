@@ -1,16 +1,21 @@
 package com.silentiumnoxe.game.petricell.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.silentiumnoxe.game.petricell.component.GroupAgent;
 import com.silentiumnoxe.game.petricell.component.KVLabel;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
+import com.silentiumnoxe.game.petricell.logic.ZoomValueHolder;
 
 import java.text.DecimalFormat;
 
@@ -96,12 +101,32 @@ public class GameScreen extends BaseScreen {
         agentAngle.setName("stat-agent-angle");
         agentAngle.setPosition(selectedAgentStatsGroup.getX(), agentVel.getY() - margin);
         selectedAgentStatsGroup.addActor(agentAngle);
+
+        var topGroup = new Group();
+        topGroup.setName("gr-top");
+        topGroup.setPosition((float) Gdx.graphics.getWidth() / 2 - 50, Gdx.graphics.getHeight() - 25);
+        stage.addActor(topGroup);
+
+        var zoomVal = new KVLabel("Zoom", defaultFont);
+        zoomVal.setName("zoom");
+        topGroup.addActor(zoomVal);
+
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean scrolled(final InputEvent event, final float x, final float y, final float amountX,
+                                    final float amountY) {
+                var holder = ZoomValueHolder.getInstance();
+                holder.setZoom(holder.getZoom() + ((long) amountY) * 100000);
+                return true;
+            }
+        });
     }
 
     @Override
     public void postRender(final float delta) {
         updateStats();
         updateSelectedAgentStats();
+        updateZoom();
     }
 
     private void updateStats() {
@@ -123,5 +148,11 @@ public class GameScreen extends BaseScreen {
         ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted((int) agent.getX(), (int) agent.getY()));
         ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
         ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
+    }
+
+    private void updateZoom() {
+        var root = stage.getRoot();
+        var value = ZoomValueHolder.getInstance().getZoomNano();
+        ((KVLabel) root.findActor("zoom")).setValue("%d %s".formatted(value, "nm"));
     }
 }
