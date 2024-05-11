@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
@@ -20,7 +19,8 @@ public class GameLoop {
 
     private static final float WORLD_WIDTH = Gdx.graphics.getWidth();
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
-    public static final Circle WORLD_CIRCLE = new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
+    public static final Circle WORLD_CIRCLE =
+            new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
     public static final int AGENT_COUNT = 1_000;
 
     private static int updatesPerSecond = 0;
@@ -50,7 +50,8 @@ public class GameLoop {
             pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
             var texture = new Texture(pixmap);
 
-            var x = new Agent(randomPosition(WORLD_CIRCLE), randomVelocity(), randomAngle(), texture, new Rectangle(0, 0, 2, 2), null, randomSize());
+            var x = new Agent(randomPosition(WORLD_CIRCLE), randomVelocity(), randomAngle(), texture,
+                    new Rectangle(0, 0, 2, 2), null, randomSize());
             for (Sector s : sectors) {
                 if (s.overlaps(x.getMask())) {
                     s.add(x);
@@ -98,7 +99,7 @@ public class GameLoop {
                 try {
                     update();
                 } catch (Exception e) {
-                    Gdx.app.error("GameLoop", "Error in game loop - "+e.getMessage(), e);
+                    Gdx.app.error("GameLoop", "Error in game loop - " + e.getMessage(), e);
                 }
 
                 try {
