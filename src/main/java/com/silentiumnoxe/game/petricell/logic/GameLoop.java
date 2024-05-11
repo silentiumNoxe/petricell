@@ -50,8 +50,10 @@ public class GameLoop {
             var size = randomSize();
 
             var pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-            pixmap.setColor(Color.RED);
-            pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
+            pixmap.setColor(new Color(255, 0, 0, 1));
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
+            pixmap.setColor(new Color(0, 0, 0, 1));
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 5);
             var texture = new Texture(pixmap);
 
             var pixmap2 = new Pixmap(size, size, Pixmap.Format.RGBA8888);
@@ -200,7 +202,7 @@ public class GameLoop {
 
     private int randomSize() {
         var r = new Random();
-        return r.nextInt(10, 20);
+        return r.nextInt(15, 25);
     }
 
     void countUPS() {
