@@ -1,20 +1,22 @@
 package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.silentiumnoxe.game.petricell.component.GroupAgent;
+import com.silentiumnoxe.game.petricell.logic.physic.AgentToAgentCollisionProcessor;
+import com.silentiumnoxe.game.petricell.logic.physic.BorderCollisionProcessor;
+import com.silentiumnoxe.game.petricell.logic.physic.PhysicProcessor;
+import com.silentiumnoxe.game.petricell.logic.physic.PhysicProcessorAggregator;
+import com.silentiumnoxe.game.petricell.logic.physic.UpdateAgentPositionProcessor;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
-import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -24,12 +26,14 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 1050;
+    public static final int AGENT_COUNT = 100;
 
     private static int updatesPerSecond = 0;
 
     private final GroupAgent groupAgent;
     private final List<Sector> sectors = new ArrayList<>();
+
+    private final PhysicProcessorAggregator physicProcessorAggregator = new PhysicProcessorAggregator();
 
     private long lastFrameTime = -1;
     private float deltaTime;
@@ -43,6 +47,10 @@ public class GameLoop {
     }
 
     public GameLoop(final GroupAgent groupAgent) {
+        physicProcessorAggregator.add(new BorderCollisionProcessor());
+        physicProcessorAggregator.add(new AgentToAgentCollisionProcessor());
+        physicProcessorAggregator.add(new UpdateAgentPositionProcessor());
+
         this.groupAgent = groupAgent;
         splitScreen(5 * 5, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -75,7 +83,7 @@ public class GameLoop {
                     x.setSector(s);
                 }
             }
-            groupAgent.addAgent(x);
+            groupAgent.add(x);
         }
     }
 
@@ -131,23 +139,30 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        var agents = groupAgent.getAgents();
-        for (var j = 0; j < agents.size; j++) {
+        var arr = groupAgent.getChildren();
+        var arr2 = arr.begin();
 
-            var agent = agents.get(j);
-            var pos = agent.getPosition();
-            var vel = agent.getVelocity();
-            var agl = agent.getAngle();
-            var rad = agl * Math.PI / 180;
-
-            borderCollision(WORLD_CIRCLE, agent);
-            agentCollision(agent);
-
-            agent.setPosition(
-                    (float) (pos.x + vel * Math.cos(rad)),
-                    (float) (pos.y + vel * Math.sin(rad))
-            );
+        for (var i = 0; i < arr2.length; i++) {
+            var a = arr2[i];
+            physicProcessorAggregator.process(arr2, i, a);
         }
+
+        arr.end();
+    }
+
+    private void updateAgent(final Agent agent, final Agent[] arr) {
+        var pos = agent.getPosition();
+        var vel = agent.getVelocity();
+        var agl = agent.getAngle();
+        var rad = agl * Math.PI / 180;
+
+        borderCollision(WORLD_CIRCLE, agent);
+        agentCollision(agent);
+
+        agent.setPosition(
+                (float) (pos.x + vel * Math.cos(rad)),
+                (float) (pos.y + vel * Math.sin(rad))
+        );
     }
 
     private void borderCollision(final Circle border, final Agent agent) {
@@ -161,6 +176,7 @@ public class GameLoop {
     }
 
     private void agentCollision(final Agent agent) {
+
 //        var sector = agent.getSector();
 //        var targets = sector.getAgents();
 //        for (var i = 0; i < targets.size; i++) {
@@ -186,10 +202,10 @@ public class GameLoop {
         return r.nextFloat(1.0f);
     }
 
-    private float randomAngle() {
-        var r = new Random();
-        return r.nextFloat(360f);
-//        return 90;
+    private int randomAngle() {
+//        var r = new Random();
+//        return r.nextInt(360);
+        return 100;
     }
 
     private Vector2 randomPosition(final Circle border) {
@@ -202,7 +218,7 @@ public class GameLoop {
 
     private int randomSize() {
         var r = new Random();
-        return r.nextInt(15, 25);
+        return r.nextInt(15, 20);
     }
 
     void countUPS() {

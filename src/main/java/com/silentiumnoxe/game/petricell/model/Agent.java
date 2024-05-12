@@ -1,7 +1,9 @@
 package com.silentiumnoxe.game.petricell.model;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -21,11 +23,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Agent extends Actor {
+public class Agent extends Actor implements Masked, Moveable {
 
     private final UUID id = UUID.randomUUID();
     private float velocity;
-    private float angle;
+    private int angle;
     private Texture texture;
     private Texture texture2;
     private Circle mask;
@@ -37,7 +39,7 @@ public class Agent extends Actor {
     public Agent(
             final Vector2 position,
             final float velocity,
-            final float angle,
+            final int angle,
             final Texture texture,
             final Texture texture2,
             final int size
@@ -52,7 +54,7 @@ public class Agent extends Actor {
         this.texture = texture;
         this.texture2 = texture2;
         this.size = size;
-        this.mask = new Circle(position.x, position.y, size);
+        this.mask = new Circle(0, 0, size);
 
         this.addListener(new ClickListener() {
             @Override
@@ -62,18 +64,20 @@ public class Agent extends Actor {
         });
     }
 
+    @Override
     public Circle getMask() {
         mask.setPosition(getX(), getY());
         return mask;
     }
 
-    public void setAngle(final float angle) {
+    @Override
+    public void setAngle(final int angle) {
         var x = angle;
         if (x > 360) {
             x = x % 360;
         }
         if (x < 0) {
-            x = x % -360;
+            x = 360 + x;
         }
 
         this.angle = x;
@@ -85,7 +89,8 @@ public class Agent extends Actor {
 
     @Override
     public void draw(final Batch batch, final float parentAlpha) {
-        batch.draw(getTexture(), getX(), getY());
+        batch.draw(getTexture(), getX(), getY(), size, size);
+
     }
 
     private void onclick(final float x, final float y) {
