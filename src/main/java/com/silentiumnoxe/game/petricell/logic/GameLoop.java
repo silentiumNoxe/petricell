@@ -24,7 +24,7 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 10;
+    public static final int AGENT_COUNT = 50;
 
     private static int updatesPerSecond = 0;
 
@@ -52,13 +52,11 @@ public class GameLoop {
             var pixmap = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
             pixmap.setColor(new Color(255, 0, 0, 1));
             pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 20 / 3);
-            pixmap.setColor(new Color(0, 0, 0, 1));
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 20 / 5);
             var texture = new Texture(pixmap);
 
             var pixmap2 = new Pixmap(20, 20, Pixmap.Format.RGBA8888);
             pixmap2.setColor(Color.WHITE);
-            pixmap2.drawCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, 20 / 3);
+            pixmap2.fillCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, 20 / 3);
             var texture2 = new Texture(pixmap2);
 
             var x = new Agent(
@@ -67,7 +65,7 @@ public class GameLoop {
                     randomAngle(),
                     texture,
                     texture2,
-                    randomSize()
+                    size
             );
             for (Sector s : sectors) {
                 if (s.contains(x.getMask())) {
@@ -203,7 +201,7 @@ public class GameLoop {
 
     private long randomSize() {
         var r = new Random();
-        return r.nextLong(ZoomValueHolder.MAX_ZOOM, ZoomValueHolder.MIN_ZOOM);
+        return r.nextLong(ZoomValueHolder.MAX_ZOOM, ZoomValueHolder.MIN_ZOOM / 100);
     }
 
     void countUPS() {

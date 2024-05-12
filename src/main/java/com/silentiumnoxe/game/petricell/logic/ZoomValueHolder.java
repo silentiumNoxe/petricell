@@ -8,7 +8,7 @@ import lombok.Setter;
 public class ZoomValueHolder {
 
     public static long MAX_ZOOM = 100; // 100 nanometers
-    public static long MIN_ZOOM = 100000000; // 10 centimeter
+    public static long MIN_ZOOM = 10000000; // 1 centimeter
 
     private static ZoomValueHolder instance;
 
@@ -32,10 +32,6 @@ public class ZoomValueHolder {
 
     public long getZoomMilli() {
         return getZoomMicro() / 1000;
-    }
-
-    public long getZoomCenti() {
-        return getZoomMilli() / 10;
     }
 
     public void setZoom(final long zoom) {

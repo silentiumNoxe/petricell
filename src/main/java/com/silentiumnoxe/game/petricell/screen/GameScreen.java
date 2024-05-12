@@ -16,6 +16,7 @@ import com.silentiumnoxe.game.petricell.component.KVLabel;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
 import com.silentiumnoxe.game.petricell.logic.ZoomValueHolder;
+import com.silentiumnoxe.game.petricell.util.SizeFormatter;
 
 import java.text.DecimalFormat;
 
@@ -102,6 +103,11 @@ public class GameScreen extends BaseScreen {
         agentAngle.setPosition(selectedAgentStatsGroup.getX(), agentVel.getY() - margin);
         selectedAgentStatsGroup.addActor(agentAngle);
 
+        var agentSize = new KVLabel("Size", defaultFont);
+        agentSize.setName("stat-agent-size");
+        agentSize.setPosition(selectedAgentStatsGroup.getX(), agentAngle.getY() - margin);
+        selectedAgentStatsGroup.addActor(agentSize);
+
         var topGroup = new Group();
         topGroup.setName("gr-top");
         topGroup.setPosition((float) Gdx.graphics.getWidth() / 2 - 50, Gdx.graphics.getHeight() - 25);
@@ -116,7 +122,15 @@ public class GameScreen extends BaseScreen {
             public boolean scrolled(final InputEvent event, final float x, final float y, final float amountX,
                                     final float amountY) {
                 var holder = ZoomValueHolder.getInstance();
-                holder.setZoom(holder.getZoom() + ((long) amountY) * 100000);
+                if (holder.getZoomMicro() < 100) {
+                    holder.setZoom(holder.getZoom() + ((long) amountY) * 100);
+                    return true;
+                }
+                if (holder.getZoomMilli() < 2) {
+                    holder.setZoom(holder.getZoom() + ((long) amountY) * 10000);
+                    return true;
+                }
+                holder.setZoom(holder.getZoom() + ((long) amountY) * 40000);
                 return true;
             }
         });
@@ -148,11 +162,12 @@ public class GameScreen extends BaseScreen {
         ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted((int) agent.getX(), (int) agent.getY()));
         ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
         ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
+        ((KVLabel) root.findActor("stat-agent-size")).setValue(SizeFormatter.applyStatic(agent.getSize()));
     }
 
     private void updateZoom() {
         var root = stage.getRoot();
         var value = ZoomValueHolder.getInstance().getZoomNano();
-        ((KVLabel) root.findActor("zoom")).setValue("%d %s".formatted(value, "nm"));
+        ((KVLabel) root.findActor("zoom")).setValue(SizeFormatter.applyStatic(value));
     }
 }
