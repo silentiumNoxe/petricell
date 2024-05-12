@@ -24,7 +24,7 @@ public class GameLoop {
     private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
     public static final Circle WORLD_CIRCLE =
             new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 50;
+    public static final int AGENT_COUNT = 100_000;
 
     private static int updatesPerSecond = 0;
 
@@ -129,10 +129,16 @@ public class GameLoop {
     private void update() {
         countUPS();
 
+        var zoom = ZoomValueHolder.getInstance().getZoom();
+
         var agents = groupAgent.getAgents();
         for (var j = 0; j < agents.size; j++) {
-
             var agent = agents.get(j);
+
+            if (zoom - agent.getSize() > 8000) {
+                continue;
+            }
+
             var pos = agent.getPosition();
             var vel = agent.getVelocity();
             var agl = agent.getAngle();

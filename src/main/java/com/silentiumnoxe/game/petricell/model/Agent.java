@@ -89,7 +89,7 @@ public class Agent extends Actor {
     public void draw(final Batch batch, final float parentAlpha) {
         var zoom = ZoomValueHolder.getInstance().getZoomNano();
         var size = this.size / zoom;
-        if (size > 5000) {
+        if (size > 8000) {
             return;
         }
         batch.draw(getTexture(), getX(), getY(), size, size);
