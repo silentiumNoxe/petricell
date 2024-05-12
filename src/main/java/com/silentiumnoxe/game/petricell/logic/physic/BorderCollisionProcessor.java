@@ -28,6 +28,6 @@ public class BorderCollisionProcessor implements PhysicProcessor {
             return;
         }
 
-        agent.setAngle(angle * 2);
+        agent.setAngle(angle + angle / 2);
     }
 }

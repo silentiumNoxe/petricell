@@ -1,6 +1,7 @@
 package com.silentiumnoxe.game.petricell.model;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -24,6 +25,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 public class Agent extends Actor implements Masked, Moveable {
+
+    private static final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private final UUID id = UUID.randomUUID();
     private float velocity;
@@ -90,7 +93,6 @@ public class Agent extends Actor implements Masked, Moveable {
     @Override
     public void draw(final Batch batch, final float parentAlpha) {
         batch.draw(getTexture(), getX(), getY(), size, size);
-
     }
 
     private void onclick(final float x, final float y) {
@@ -100,5 +102,9 @@ public class Agent extends Actor implements Masked, Moveable {
 
     public Vector2 getPosition() {
         return new Vector2(getX(), getY());
+    }
+
+    public Vector2 getCenter() {
+        return new Vector2(getX() + getWidth() / 2, getY() + getHeight() / 2);
     }
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.silentiumnoxe.game.petricell.component.GroupAgent;
 import com.silentiumnoxe.game.petricell.component.KVLabel;
@@ -15,6 +16,8 @@ import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
 import java.text.DecimalFormat;
 
 public class GameScreen extends BaseScreen {
+
+    private static final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private final SpriteBatch batch = new SpriteBatch();
     private final BitmapFont defaultFont = new BitmapFont();
@@ -102,6 +105,7 @@ public class GameScreen extends BaseScreen {
     public void postRender(final float delta) {
         updateStats();
         updateSelectedAgentStats();
+        debug();
     }
 
     private void updateStats() {
@@ -123,5 +127,20 @@ public class GameScreen extends BaseScreen {
         ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted((int) agent.getX(), (int) agent.getY()));
         ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
         ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
+    }
+
+    private void debug() {
+        var agent = SelectedAgentHolder.getInstance().getSelected();
+        if (agent == null) {
+            return;
+        }
+
+        var center = agent.getCenter();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.line(center.x, center.y, center.x + 100, center.y);
+        shapeRenderer.line(center.x, center.y, (float) (center.x + 100 * Math.cos(agent.getAngleRad())), (float) (center.y + 100 * Math.sin(agent.getAngleRad())));
+        shapeRenderer.end();
     }
 }
