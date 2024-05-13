@@ -1,18 +1,15 @@
 package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.silentiumnoxe.game.petricell.component.GroupAgent;
+import com.silentiumnoxe.game.petricell.config.WorldConfig;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
-import lombok.Getter;
+import com.silentiumnoxe.game.petricell.storage.AgentStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +17,12 @@ import java.util.Random;
 
 public class GameLoop {
 
-    private static final float WORLD_WIDTH = Gdx.graphics.getWidth();
-    private static final float WORLD_HEIGHT = Gdx.graphics.getHeight();
-    public static final Circle WORLD_CIRCLE =
-            new Circle((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2, 300);
-    public static final int AGENT_COUNT = 1050;
+    public static final int AGENT_COUNT = 100_000;
 
     private static int updatesPerSecond = 0;
 
-    private final GroupAgent groupAgent;
+    private final WorldConfig worldConfig;
+    private final AgentStorage agentStorage;
     private final List<Sector> sectors = new ArrayList<>();
 
     private long lastFrameTime = -1;
@@ -42,9 +36,11 @@ public class GameLoop {
         return updatesPerSecond;
     }
 
-    public GameLoop(final GroupAgent groupAgent) {
-        this.groupAgent = groupAgent;
-        splitScreen(5 * 5, WORLD_WIDTH, WORLD_HEIGHT);
+    public GameLoop(final WorldConfig worldConfig, final AgentStorage agentStorage) {
+        this.worldConfig = worldConfig;
+        this.agentStorage = agentStorage;
+
+        splitScreen(5 * 5, worldConfig.getWidth(), worldConfig.getHeight());
 
         for (int i = 0; i < AGENT_COUNT; i++) {
             var size = randomSize();
@@ -62,7 +58,7 @@ public class GameLoop {
             var texture2 = new Texture(pixmap2);
 
             var x = new Agent(
-                    randomPosition(WORLD_CIRCLE),
+                    randomPosition(worldConfig.getShape()),
                     randomVelocity(),
                     randomAngle(),
                     texture,
@@ -75,7 +71,7 @@ public class GameLoop {
                     x.setSector(s);
                 }
             }
-            groupAgent.addAgent(x);
+            agentStorage.add(x);
         }
     }
 
@@ -131,7 +127,7 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        var agents = groupAgent.getAgents();
+        var agents = agentStorage.snapshot();
         for (var j = 0; j < agents.size; j++) {
 
             var agent = agents.get(j);
@@ -140,7 +136,7 @@ public class GameLoop {
             var agl = agent.getAngle();
             var rad = agl * Math.PI / 180;
 
-            borderCollision(WORLD_CIRCLE, agent);
+            borderCollision(worldConfig.getShape(), agent);
             agentCollision(agent);
 
             agent.setPosition(

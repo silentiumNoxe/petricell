@@ -2,32 +2,60 @@ package com.silentiumnoxe.game.petricell.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.silentiumnoxe.game.petricell.component.GroupAgent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.silentiumnoxe.game.petricell.component.KVLabel;
+import com.silentiumnoxe.game.petricell.config.WorldConfig;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
+import com.silentiumnoxe.game.petricell.render.AgentRenderer;
+import com.silentiumnoxe.game.petricell.render.Renderer;
+import com.silentiumnoxe.game.petricell.storage.AgentStorage;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameScreen extends BaseScreen {
 
     private final SpriteBatch batch = new SpriteBatch();
+    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
+    private final Stage stage;
+
     private final BitmapFont defaultFont = new BitmapFont();
     private final DecimalFormat df = new DecimalFormat("#,###.##");
     private final Texture petriTexture;
     private final Texture pointTexture;
 
+    private final WorldConfig worldConfig;
+    private final AgentStorage agentStorage;
+
+    private final List<Renderer> rendererList = new ArrayList<>();
+
     private GameLoop gameLoop;
 
     public GameScreen() {
-        super();
+        worldConfig = new WorldConfig(300, (float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
 
-        var size = (int) GameLoop.WORLD_CIRCLE.radius + 12;
+        stage = new Stage(new ScalingViewport(Scaling.stretch,
+                Gdx.graphics.getWidth(),
+                Gdx.graphics.getHeight(),
+                new OrthographicCamera()
+        ), batch);
+        agentStorage = new AgentStorage();
+
+        rendererList.add(new AgentRenderer(agentStorage));
+
+        var size = worldConfig.getRadius() + 12;
         Pixmap pixmap = new Pixmap(size * 2 + 10, size * 2 + 10, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.GREEN);
         pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size);
@@ -41,11 +69,7 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public void show() {
-        super.show();
-
-        var groupAgents = new GroupAgent();
-        stage.addActor(groupAgents);
-        gameLoop = new GameLoop(groupAgents);
+        gameLoop = new GameLoop(worldConfig, agentStorage);
         gameLoop.start();
 
         var statsGroup = new Group();
@@ -84,7 +108,10 @@ public class GameScreen extends BaseScreen {
 
         var agentPos = new KVLabel("Position", defaultFont);
         agentPos.setName("stat-agent-pos");
-        agentPos.setPosition(selectedAgentStatsGroup.getX(), selectedAgentStatsGroup.getY() + selectedAgentStatsGroup.getHeight());
+        agentPos.setPosition(
+                selectedAgentStatsGroup.getX(),
+                selectedAgentStatsGroup.getY() + selectedAgentStatsGroup.getHeight()
+        );
         selectedAgentStatsGroup.addActor(agentPos);
 
         var agentVel = new KVLabel("Velocity", defaultFont);
@@ -99,7 +126,16 @@ public class GameScreen extends BaseScreen {
     }
 
     @Override
-    public void postRender(final float delta) {
+    public void render(final float delta) {
+        ScreenUtils.clear(Color.BLACK);
+
+        batch.begin();
+        rendererList.forEach(renderer -> renderer.render(batch, delta));
+        batch.end();
+
+        stage.act();
+        stage.draw();
+
         updateStats();
         updateSelectedAgentStats();
     }
@@ -108,7 +144,7 @@ public class GameScreen extends BaseScreen {
         var root = stage.getRoot();
         ((KVLabel) root.findActor("stat-fps")).setValue(Gdx.graphics.getFramesPerSecond());
         ((KVLabel) root.findActor("stat-ups")).setValue(GameLoop.getUpdatesPerSecond());
-        ((KVLabel) root.findActor("stat-agents")).setValue(df.format(GameLoop.AGENT_COUNT));
+        ((KVLabel) root.findActor("stat-agents")).setValue(df.format(agentStorage.count()));
         ((KVLabel) root.findActor("stat-heap")).setValue(
                 "%sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)));
     }
@@ -120,7 +156,10 @@ public class GameScreen extends BaseScreen {
         }
 
         var root = stage.getRoot();
-        ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted((int) agent.getX(), (int) agent.getY()));
+        ((KVLabel) root.findActor("stat-agent-pos")).setValue("%d:%d".formatted(
+                (int) agent.getX(),
+                (int) agent.getY()
+        ));
         ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
         ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
     }
