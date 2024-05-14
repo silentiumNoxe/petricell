@@ -15,7 +15,7 @@ public class AgentRenderer implements Renderer {
         snap.begin();
         for (var i = 0; i < snap.size; i++) {
             var agent = snap.get(i);
-            batch.draw(agent.getTexture(), agent.getX(), agent.getY());
+            agent.draw(batch, 1f);
         }
         snap.end();
     }

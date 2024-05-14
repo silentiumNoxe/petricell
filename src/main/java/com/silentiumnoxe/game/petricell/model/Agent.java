@@ -1,18 +1,16 @@
 package com.silentiumnoxe.game.petricell.model;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,21 +24,21 @@ public class Agent extends Actor {
     private final UUID id = UUID.randomUUID();
     private float velocity;
     private float angle;
-    private Texture texture;
-    private Texture texture2;
+
     private Circle mask;
     private Sector sector;
 
     private int size;
     private boolean selected;
 
+    private AgentStyle style;
+
     public Agent(
             final Vector2 position,
             final float velocity,
             final float angle,
-            final Texture texture,
-            final Texture texture2,
-            final int size
+            final int size,
+            final AgentStyle style
     ) {
         this.setBounds(position.x, position.y, size, size);
         this.setWidth(size);
@@ -49,10 +47,10 @@ public class Agent extends Actor {
 
         this.velocity = velocity;
         this.angle = angle;
-        this.texture = texture;
-        this.texture2 = texture2;
         this.size = size;
         this.mask = new Circle(position.x, position.y, size);
+
+        this.style = style;
 
         this.addListener(new ClickListener() {
             @Override
@@ -80,12 +78,12 @@ public class Agent extends Actor {
     }
 
     public Texture getTexture() {
-        return selected ? texture2 : texture;
+        return selected ? style.getSelection() : style.getPrimary();
     }
 
     @Override
     public void draw(final Batch batch, final float parentAlpha) {
-        batch.draw(getTexture(), getX(), getY());
+        batch.draw(getTexture(), getX(), getY(), getWidth(), getHeight());
     }
 
     private void onclick(final float x, final float y) {
@@ -95,5 +93,54 @@ public class Agent extends Actor {
 
     public Vector2 getPosition() {
         return new Vector2(getX(), getY());
+    }
+
+    @Getter
+    public static class AgentStyle {
+        private static final int SIZE = 30;
+
+        private Color color1;
+        private Color color2;
+
+        private Texture primary;
+        private Texture selection;
+
+        public AgentStyle() {
+            this(Color.RED, Color.BLACK);
+        }
+
+        public AgentStyle(final Color color1, final Color color2) {
+            this.color1 = color1;
+            this.color2 = color2;
+
+            primary = generatePrimaryTexture(color1, color2);
+            selection = generateSelectionTexture();
+        }
+
+        public void setColor1(final Color color1) {
+            this.color1 = color1;
+            primary = generatePrimaryTexture(color1, color2);
+        }
+
+        public void setColor2(final Color color2) {
+            this.color2 = color2;
+            primary = generatePrimaryTexture(color1, color2);
+        }
+
+        private Texture generatePrimaryTexture(final Color color1, final Color color2) {
+            var pixmap = new Pixmap(SIZE, SIZE, Pixmap.Format.RGBA8888);
+            pixmap.setColor(color1);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 10);
+            pixmap.setColor(color2);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 10);
+            return new Texture(pixmap);
+        }
+
+        private Texture generateSelectionTexture() {
+            var pixmap = new Pixmap(SIZE, SIZE, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.WHITE);
+            pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, SIZE / 3);
+            return new Texture(pixmap);
+        }
     }
 }

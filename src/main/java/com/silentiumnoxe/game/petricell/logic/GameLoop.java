@@ -1,9 +1,6 @@
 package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.silentiumnoxe.game.petricell.config.WorldConfig;
@@ -17,7 +14,7 @@ import java.util.Random;
 
 public class GameLoop {
 
-    public static final int AGENT_COUNT = 100_000;
+    public static final int AGENT_COUNT = 1_000;
 
     private static int updatesPerSecond = 0;
 
@@ -43,27 +40,12 @@ public class GameLoop {
         splitScreen(5 * 5, worldConfig.getWidth(), worldConfig.getHeight());
 
         for (int i = 0; i < AGENT_COUNT; i++) {
-            var size = randomSize();
-
-            var pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-            pixmap.setColor(new Color(255, 0, 0, 1));
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 3);
-            pixmap.setColor(new Color(0, 0, 0, 1));
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, size / 5);
-            var texture = new Texture(pixmap);
-
-            var pixmap2 = new Pixmap(size, size, Pixmap.Format.RGBA8888);
-            pixmap2.setColor(Color.WHITE);
-            pixmap2.drawCircle(pixmap2.getWidth() / 2, pixmap2.getHeight() / 2, size / 3);
-            var texture2 = new Texture(pixmap2);
-
             var x = new Agent(
                     randomPosition(worldConfig.getShape()),
                     randomVelocity(),
                     randomAngle(),
-                    texture,
-                    texture2,
-                    randomSize()
+                    randomSize(),
+                    new Agent.AgentStyle()
             );
             for (Sector s : sectors) {
                 if (s.contains(x.getMask())) {
