@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class GameLoop {
 
-    public static final int AGENT_COUNT = 70_000;
+    public static final int AGENT_COUNT = 30_000;
 
     private static int updatesPerSecond = 0;
 
