@@ -186,6 +186,6 @@ public class GameScreen extends BaseScreen {
     }
 
     private int countAgents() {
-        return gameLoop.countAgents() + gameLoop2.countAgents() + gameLoop3.countAgents() + gameLoop4.countAgents();
+        return agentStorage.count();
     }
 }

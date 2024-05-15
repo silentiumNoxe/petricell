@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.silentiumnoxe.game.petricell.config.WorldConfig;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
@@ -15,17 +14,18 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class GameLoop {
 
-    public static final int AGENT_COUNT = 250_000;
+    public static final int AGENT_COUNT = 1_000;
 
     private static int updatesPerSecond = 0;
 
+    private final UUID sectorId = UUID.randomUUID();
     private final WorldConfig worldConfig;
     private final AgentStorage agentStorage;
 
-    private final Array<Agent> agents = new Array<>();
     private final List<Sector> sectors = new ArrayList<>();
 
     @Getter
@@ -48,17 +48,16 @@ public class GameLoop {
         this.worldConfig = worldConfig;
         this.agentStorage = agentStorage;
 
-        splitScreen(5 * 5, worldConfig.getWidth(), worldConfig.getHeight());
-
         for (int i = 0; i < AGENT_COUNT; i++) {
             var x = new Agent(
+                    sectorId,
                     randomPosition(worldConfig.getShape()),
                     randomVelocity(),
                     randomAngle(),
                     randomSize(),
                     null
             );
-            agents.add(x);
+            agentStorage.add(x);
         }
     }
 
@@ -123,8 +122,8 @@ public class GameLoop {
         snapshot.setColor(Color.BLACK);
         snapshot.fillRectangle(0, 0, snapshot.getWidth(), snapshot.getHeight());
 
+        var agents = agentStorage.getAgentsInSector(sectorId);
         for (var j = 0; j < agents.size; j++) {
-
             var agent = agents.get(j);
             var pos = agent.getPosition();
             var vel = agent.getVelocity();
@@ -220,9 +219,5 @@ public class GameLoop {
 
     public List<Sector> getSectors() {
         return sectors;
-    }
-
-    public int countAgents() {
-        return agents.size;
     }
 }

@@ -22,6 +22,7 @@ import java.util.UUID;
 public class Agent extends Actor {
 
     private final UUID id = UUID.randomUUID();
+    private final UUID sectorId;
     private float velocity;
     private float angle;
 
@@ -33,6 +34,7 @@ public class Agent extends Actor {
     private AgentStyle style;
 
     public Agent(
+            final UUID sectorId,
             final Vector2 position,
             final float velocity,
             final float angle,
@@ -44,6 +46,7 @@ public class Agent extends Actor {
         this.setHeight(size);
         this.setPosition(position.x, position.y);
 
+        this.sectorId = sectorId;
         this.velocity = velocity;
         this.angle = angle;
         this.size = size;
