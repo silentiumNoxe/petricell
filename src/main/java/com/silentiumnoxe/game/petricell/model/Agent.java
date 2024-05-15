@@ -26,7 +26,6 @@ public class Agent extends Actor {
     private float angle;
 
     private Circle mask;
-    private Sector sector;
 
     private int size;
     private boolean selected;

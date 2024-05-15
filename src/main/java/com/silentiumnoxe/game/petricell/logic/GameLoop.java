@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class GameLoop {
 
-    public static final int AGENT_COUNT = 30_000;
+    public static final int AGENT_COUNT = 250_000;
 
     private static int updatesPerSecond = 0;
 
@@ -56,14 +56,8 @@ public class GameLoop {
                     randomVelocity(),
                     randomAngle(),
                     randomSize(),
-                    new Agent.AgentStyle()
+                    null
             );
-            for (Sector s : sectors) {
-                if (s.contains(x.getMask())) {
-                    s.add(x);
-                    x.setSector(s);
-                }
-            }
             agents.add(x);
         }
     }
