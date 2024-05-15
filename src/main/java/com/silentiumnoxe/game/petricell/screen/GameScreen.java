@@ -139,20 +139,14 @@ public class GameScreen extends BaseScreen {
         ScreenUtils.clear(Color.BLACK);
 
         batch.begin();
-        var snapshot1 = gameLoop.getSnapshot();
-        var snapshot2 = gameLoop2.getSnapshot();
-        var snapshot3 = gameLoop3.getSnapshot();
-        var snapshot4 = gameLoop4.getSnapshot();
-        if (snapshot1 != null && snapshot2 != null && snapshot3 != null && snapshot4 != null) {
-            batch.draw(new Texture(snapshot1), 0, 0);
-            batch.draw(new Texture(snapshot2), (float) Gdx.graphics.getWidth() / 2, 0);
-            batch.draw(new Texture(snapshot4), (float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-            batch.draw(new Texture(snapshot3), 0, (float) Gdx.graphics.getHeight() / 2);
-            snapshot1.dispose();
-            snapshot2.dispose();
-            snapshot3.dispose();
-            snapshot4.dispose();
-        }
+        var tex1 = new Texture(gameLoop.getSnapshot());
+        batch.draw(tex1, 0, 0);
+        var tex2 = new Texture(gameLoop2.getSnapshot());
+        batch.draw(tex2, (float) Gdx.graphics.getWidth() / 2, 0);
+        var tex3 = new Texture(gameLoop3.getSnapshot());
+        batch.draw(tex3, (float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
+        var tex4 = new Texture(gameLoop4.getSnapshot());
+        batch.draw(tex4, 0, (float) Gdx.graphics.getHeight() / 2);
         batch.end();
 
         stage.act();
@@ -160,13 +154,18 @@ public class GameScreen extends BaseScreen {
 
         updateStats();
         updateSelectedAgentStats();
+
+        tex1.dispose();
+        tex2.dispose();
+        tex3.dispose();
+        tex4.dispose();
     }
 
     private void updateStats() {
         var root = stage.getRoot();
         ((KVLabel) root.findActor("stat-fps")).setValue(Gdx.graphics.getFramesPerSecond());
         ((KVLabel) root.findActor("stat-ups")).setValue(GameLoop.getUpdatesPerSecond());
-        ((KVLabel) root.findActor("stat-agents")).setValue(df.format(agentStorage.count()));
+        ((KVLabel) root.findActor("stat-agents")).setValue(df.format(countAgents()));
         ((KVLabel) root.findActor("stat-heap")).setValue(
                 "%sMb".formatted(df.format(Gdx.app.getNativeHeap() / 1024 / 1024)));
     }
@@ -184,5 +183,9 @@ public class GameScreen extends BaseScreen {
         ));
         ((KVLabel) root.findActor("stat-agent-vel")).setValue(df.format(agent.getVelocity()));
         ((KVLabel) root.findActor("stat-agent-angle")).setValue(df.format(agent.getAngle()));
+    }
+
+    private int countAgents() {
+        return gameLoop.countAgents() + gameLoop2.countAgents() + gameLoop3.countAgents() + gameLoop4.countAgents();
     }
 }

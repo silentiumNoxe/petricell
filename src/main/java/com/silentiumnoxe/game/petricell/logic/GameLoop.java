@@ -1,6 +1,7 @@
 package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
@@ -27,7 +28,8 @@ public class GameLoop {
     private final Array<Agent> agents = new Array<>();
     private final List<Sector> sectors = new ArrayList<>();
 
-    private Pixmap snapshot;
+    @Getter
+    private Pixmap snapshot = new Pixmap(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, Pixmap.Format.RGBA8888);
 
     private boolean started;
 
@@ -124,7 +126,8 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        var pixmap = new Pixmap(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, Pixmap.Format.RGBA8888);
+        snapshot.setColor(Color.BLACK);
+        snapshot.fillRectangle(0, 0, snapshot.getWidth(), snapshot.getHeight());
 
         for (var j = 0; j < agents.size; j++) {
 
@@ -142,10 +145,8 @@ public class GameLoop {
                     (float) (pos.y + vel * Math.sin(rad))
             );
 
-            agent.draw(pixmap);
+            agent.draw(snapshot);
         }
-
-        snapshot = pixmap;
     }
 
     private void borderCollision(final Circle border, final Agent agent) {
@@ -227,9 +228,7 @@ public class GameLoop {
         return sectors;
     }
 
-    public Pixmap getSnapshot() {
-        var x = snapshot;
-        snapshot = null;
-        return x;
+    public int countAgents() {
+        return agents.size;
     }
 }
