@@ -2,33 +2,31 @@ package com.silentiumnoxe.game.petricell.logic;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.silentiumnoxe.game.petricell.config.WorldConfig;
 import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.model.Sector;
 import com.silentiumnoxe.game.petricell.storage.AgentStorage;
 import lombok.Getter;
-import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-
 public class GameLoop {
 
-    public static final int AGENT_COUNT = 300_000;
+    public static final int AGENT_COUNT = 70_000;
 
     private static int updatesPerSecond = 0;
 
     private final WorldConfig worldConfig;
     private final AgentStorage agentStorage;
+
+    private final Array<Agent> agents = new Array<>();
     private final List<Sector> sectors = new ArrayList<>();
 
-    @Getter
     private Pixmap snapshot;
 
     private boolean started;
@@ -64,7 +62,7 @@ public class GameLoop {
                     x.setSector(s);
                 }
             }
-            agentStorage.add(x);
+            agents.add(x);
         }
     }
 
@@ -126,9 +124,8 @@ public class GameLoop {
     private void update() {
         countUPS();
 
-        var pixmap = new Pixmap(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Pixmap.Format.RGBA8888);
+        var pixmap = new Pixmap(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2, Pixmap.Format.RGBA8888);
 
-        var agents = agentStorage.snapshot();
         for (var j = 0; j < agents.size; j++) {
 
             var agent = agents.get(j);
@@ -228,5 +225,11 @@ public class GameLoop {
 
     public List<Sector> getSectors() {
         return sectors;
+    }
+
+    public Pixmap getSnapshot() {
+        var x = snapshot;
+        snapshot = null;
+        return x;
     }
 }

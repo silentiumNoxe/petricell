@@ -42,6 +42,9 @@ public class GameScreen extends BaseScreen {
     private final List<Renderer> rendererList = new ArrayList<>();
 
     private GameLoop gameLoop;
+    private GameLoop gameLoop2;
+    private GameLoop gameLoop3;
+    private GameLoop gameLoop4;
 
     public GameScreen() {
         worldConfig = new WorldConfig(300, (float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
@@ -70,7 +73,13 @@ public class GameScreen extends BaseScreen {
     @Override
     public void show() {
         gameLoop = new GameLoop(worldConfig, agentStorage);
+        gameLoop2 = new GameLoop(worldConfig, agentStorage);
+        gameLoop3 = new GameLoop(worldConfig, agentStorage);
+        gameLoop4 = new GameLoop(worldConfig, agentStorage);
         gameLoop.start();
+        gameLoop2.start();
+        gameLoop3.start();
+        gameLoop4.start();
 
         var statsGroup = new Group();
         statsGroup.setName("gr-stats");
@@ -130,9 +139,19 @@ public class GameScreen extends BaseScreen {
         ScreenUtils.clear(Color.BLACK);
 
         batch.begin();
-        var snapshot = gameLoop.getSnapshot();
-        if (snapshot != null) {
-            batch.draw(new Texture(snapshot), 0, 0);
+        var snapshot1 = gameLoop.getSnapshot();
+        var snapshot2 = gameLoop2.getSnapshot();
+        var snapshot3 = gameLoop3.getSnapshot();
+        var snapshot4 = gameLoop4.getSnapshot();
+        if (snapshot1 != null && snapshot2 != null && snapshot3 != null && snapshot4 != null) {
+            batch.draw(new Texture(snapshot1), 0, 0);
+            batch.draw(new Texture(snapshot2), (float) Gdx.graphics.getWidth() / 2, 0);
+            batch.draw(new Texture(snapshot4), (float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
+            batch.draw(new Texture(snapshot3), 0, (float) Gdx.graphics.getHeight() / 2);
+            snapshot1.dispose();
+            snapshot2.dispose();
+            snapshot3.dispose();
+            snapshot4.dispose();
         }
         batch.end();
 
