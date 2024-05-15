@@ -86,6 +86,11 @@ public class Agent extends Actor {
         batch.draw(getTexture(), getX(), getY(), getWidth(), getHeight());
     }
 
+    public void draw(final Pixmap pixmap) {
+        pixmap.setColor(Color.RED);
+        pixmap.drawCircle((int) getX(), (int) getY(), size / 2);
+    }
+
     private void onclick(final float x, final float y) {
         selected = true;
         SelectedAgentHolder.getInstance().setSelected(this);

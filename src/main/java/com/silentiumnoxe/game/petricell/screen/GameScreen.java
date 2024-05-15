@@ -130,7 +130,10 @@ public class GameScreen extends BaseScreen {
         ScreenUtils.clear(Color.BLACK);
 
         batch.begin();
-        rendererList.forEach(renderer -> renderer.render(batch, delta));
+        var snapshot = gameLoop.getSnapshot();
+        if (snapshot != null) {
+            batch.draw(new Texture(snapshot), 0, 0);
+        }
         batch.end();
 
         stage.act();
