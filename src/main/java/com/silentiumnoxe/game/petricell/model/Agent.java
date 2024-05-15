@@ -97,7 +97,7 @@ public class Agent extends Actor {
 
     @Getter
     public static class AgentStyle {
-        private static final int SIZE = 30;
+        private static final int SIZE = 25;
 
         private Color color1;
         private Color color2;
@@ -130,16 +130,16 @@ public class Agent extends Actor {
         private Texture generatePrimaryTexture(final Color color1, final Color color2) {
             var pixmap = new Pixmap(SIZE, SIZE, Pixmap.Format.RGBA8888);
             pixmap.setColor(color1);
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 10);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, SIZE / 2);
             pixmap.setColor(color2);
-            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, 10);
+            pixmap.fillCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, SIZE / 4);
             return new Texture(pixmap);
         }
 
         private Texture generateSelectionTexture() {
             var pixmap = new Pixmap(SIZE, SIZE, Pixmap.Format.RGBA8888);
             pixmap.setColor(Color.WHITE);
-            pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, SIZE / 3);
+            pixmap.drawCircle(pixmap.getWidth() / 2, pixmap.getHeight() / 2, SIZE / 2);
             return new Texture(pixmap);
         }
     }
