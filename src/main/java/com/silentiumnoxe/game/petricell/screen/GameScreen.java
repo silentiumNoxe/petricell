@@ -17,6 +17,7 @@ import com.silentiumnoxe.game.petricell.component.KVLabel;
 import com.silentiumnoxe.game.petricell.config.WorldConfig;
 import com.silentiumnoxe.game.petricell.logic.GameLoop;
 import com.silentiumnoxe.game.petricell.logic.SelectedAgentHolder;
+import com.silentiumnoxe.game.petricell.model.Agent;
 import com.silentiumnoxe.game.petricell.render.AgentRenderer;
 import com.silentiumnoxe.game.petricell.render.Renderer;
 import com.silentiumnoxe.game.petricell.storage.AgentStorage;

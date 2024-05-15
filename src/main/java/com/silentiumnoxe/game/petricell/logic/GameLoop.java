@@ -48,17 +48,7 @@ public class GameLoop {
         this.worldConfig = worldConfig;
         this.agentStorage = agentStorage;
 
-        for (int i = 0; i < AGENT_COUNT; i++) {
-            var x = new Agent(
-                    sectorId,
-                    randomPosition(worldConfig.getShape()),
-                    randomVelocity(),
-                    randomAngle(),
-                    randomSize(),
-                    null
-            );
-            agentStorage.add(x);
-        }
+        generateAgents(agentStorage);
     }
 
     private void splitScreen(final int parts, final float width, final float height) {
@@ -219,5 +209,19 @@ public class GameLoop {
 
     public List<Sector> getSectors() {
         return sectors;
+    }
+
+    private void generateAgents(final AgentStorage storage) {
+        for (int i = 0; i < AGENT_COUNT; i++) {
+            var x = new Agent(
+                    sectorId,
+                    randomPosition(worldConfig.getShape()),
+                    randomVelocity(),
+                    randomAngle(),
+                    randomSize(),
+                    null
+            );
+            storage.add(x);
+        }
     }
 }
